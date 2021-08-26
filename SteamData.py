@@ -30,30 +30,34 @@ class SteamData:
         self.dict_data = new_data
         return self
 
-    def clean(self, fillEmpty=True, deleteRows=None):
+    def clean(self, fillEmpty=True, deleteRows=None, allowNulls=True):
         """Clean the table."""
         if deleteRows is None:
-            deleteRows = list([])
+            deleteRows = []
         print("Cleaning...")
         for row in self.dict_data[:]:
-            if len(deleteRows) > 0:
-                for key in deleteRows:
+            if not allowNulls or len(deleteRows) > 0:
+                headers = deleteRows
+                if not allowNulls:
+                    headers = list(row.keys())
+                for key in headers:
                     if pd.isna(row[key]) or row[key] == "NaN":
                         del self.dict_data[self.dict_data.index(row)]
                         print('Removing rows...', flush=True, end="\r")
                         break
-            if fillEmpty:
-                for key in row.keys():
-                    if row[key] == "" or pd.isna(row[key]):
-                        row[key] = "NaN"
+
             del row['url']
             row['original_price'] = 0 if pd.isna(row['original_price']) else row['original_price']
             row['discount_price'] = row['original_price'] if pd.isna(row['discount_price']) else row['discount_price']
+            row['achievements'] = 0 if pd.isna(row['achievements']) else row['achievements']
             row['total_languages'] = 0
             languages = str(row['languages']).split(" - ")
             for langs in languages:
                 row['total_languages'] += len(langs.split(","))
-
+            if fillEmpty:
+                for key in row.keys():
+                    if row[key] == "" or pd.isna(row[key]):
+                        row[key] = "NaN"
         print("Clean completed.")
 
         return self
@@ -75,9 +79,10 @@ class SteamData:
         self._STATUS = True
         return self
 
-    def csv_open(self, office_version=16):
+    def csv_open(self, office_version=16, force=False):
         if not self._STATUS:
             return
-        input("Press Enter to open csv file...")
+        if not force:
+            input("Press Enter to open csv file...")
         Popen(r"C:\Program Files (x86)\Microsoft Office\root\Office" + str(
             office_version) + "\EXCEL.EXE " + self._TARGET_FILE)
