@@ -30,14 +30,14 @@ class SteamData:
         self.dict_data = new_data
         return self
 
-    def clean(self, fillEmpty=True, deleteRows=None, allowNulls=True):
+    def clean(self, deleteNullRows=None, fillEmpty=True, allowNulls=True):
         """Clean the table."""
-        if deleteRows is None:
-            deleteRows = []
+        if deleteNullRows is None:
+            deleteNullRows = []
         print("Cleaning...")
         for row in self.dict_data[:]:
-            if not allowNulls or len(deleteRows) > 0:
-                headers = deleteRows
+            if not allowNulls or len(deleteNullRows) > 0:
+                headers = deleteNullRows
                 if not allowNulls:
                     headers = list(row.keys())
                 for key in headers:
