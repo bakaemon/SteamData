@@ -44,17 +44,6 @@ class SteamData:
             deleteNullRows = []
         print("Cleaning...")
         for row in self.dict_data[:]:
-            if not allowNulls or len(deleteNullRows) > 0:
-                headers = deleteNullRows
-                if not allowNulls:
-                    headers = list(row.keys())
-                for key in headers:
-                    if pd.isna(row[key]) or row[key] == "NaN":
-                        del self.dict_data[self.dict_data.index(row)]
-                        print('Removing rows...', flush=True, end="\r")
-                        break
-
-            del row['url']
             row['original_price'] = 0 if pd.isna(row['original_price']) else row['original_price'].replace("$", "")
             if str(row['original_price']).lower() == "free to play" or row['original_price'] in (0, "0"):
                 row['original_price'] = "Free"
@@ -74,6 +63,17 @@ class SteamData:
                 for key in row.keys():
                     if row[key] == "" or pd.isna(row[key]):
                         row[key] = "NaN"
+            if not allowNulls or len(deleteNullRows) > 0:
+                headers = deleteNullRows
+                if not allowNulls:
+                    headers = list(row.keys())
+                for key in headers:
+                    if pd.isna(row[key]) or row[key] == "NaN":
+                        del self.dict_data[self.dict_data.index(row)]
+                        print('Removing rows...', flush=True, end="\r")
+                        break
+
+            del row['url']
         print("Clean completed.")
 
         return self
