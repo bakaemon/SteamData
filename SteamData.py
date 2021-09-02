@@ -45,20 +45,19 @@ class SteamData:
         print("Cleaning...")
         for row in self.dict_data[:]:
             row['original_price'] = 0 if pd.isna(row['original_price']) else row['original_price'].replace("$", "")
-            if str(row['original_price']).lower() == "free to play" or row['original_price'] in (0, "0"):
+            if str(row['original_price']).lower() in ("free to play", "play for free!") or row['original_price'] in (0, "0"):
                 row['original_price'] = "Free"
             elif not isfloat(row['original_price']):
                 row['original_price'] = "Demo play"
             row['discount_price'] = row['original_price'] if pd.isna(row['discount_price']) else row['discount_price'] \
                 .replace("$", "")
-            row['mature_content'] = "No mature content" if pd.isna(row['mature_content']) \
-                                                          or str(row['mature_content']).lower() == "nan" \
-                else "Contain mature content"
             row['achievements'] = 0 if pd.isna(row['achievements']) else row['achievements']
             row['total_languages'] = 0
             languages = str(row['languages']).split(" - ")
             for langs in languages:
                 row['total_languages'] += len(langs.split(","))
+            genres = str(row['genre']).split(",")
+            row['number_of_genre'] = len(genres)
             if fillEmpty:
                 for key in row.keys():
                     if row[key] == "" or pd.isna(row[key]):
@@ -72,8 +71,10 @@ class SteamData:
                         del self.dict_data[self.dict_data.index(row)]
                         print('Removing rows...', flush=True, end="\r")
                         break
-
+            del row['recent_reviews']
             del row['url']
+            del row['mature_content']
+            del row['recommended_requirements']
         print("Clean completed.")
 
         return self
@@ -81,7 +82,6 @@ class SteamData:
     def process(self, repeat=False):
         """Save the processed data to file."""
         print("Processing...")
-        """Save the processed data to file."""
         dataframe = pd.DataFrame(self.dict_data)
         try:
             dataframe.to_csv(self._TARGET_FILE)
