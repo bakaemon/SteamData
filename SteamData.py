@@ -47,8 +47,11 @@ class SteamData:
                         break
 
             del row['url']
-            row['original_price'] = 0 if pd.isna(row['original_price']) else row['original_price']
-            row['discount_price'] = row['original_price'] if pd.isna(row['discount_price']) else row['discount_price']
+            row['original_price'] = 0 if pd.isna(row['original_price']) else row['original_price'].replace("$", "")
+            if str(row['original_price']).lower() == "free to play":
+                row['original_price'] = "Free"
+            row['discount_price'] = row['original_price'] if pd.isna(row['discount_price']) else row['discount_price']\
+                .replace("$", "")
             row['achievements'] = 0 if pd.isna(row['achievements']) else row['achievements']
             row['total_languages'] = 0
             languages = str(row['languages']).split(" - ")
