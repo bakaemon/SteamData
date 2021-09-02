@@ -20,7 +20,7 @@ class SteamData:
 
     def __init__(self):
         print("Reading csv file...")
-        self._csvf = pd.read_csv(self._TARGET_DIR + "steam_games.csv")
+        self._csvf = pd.read_csv(self._TARGET_DIR + "steam_games.csv", encoding="ISO-8859-1")
         self.dict_data = self._csvf.to_dict('records')
 
     def json_save(self):
