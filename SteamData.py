@@ -5,6 +5,14 @@ import pandas as pd
 from subprocess import Popen
 
 
+def isfloat(value):
+    try:
+        float(value)
+        return True
+    except ValueError:
+        return False
+
+
 class SteamData:
     _TARGET_DIR = "files/"
     _TARGET_FILE = _TARGET_DIR + "processed_data.csv"
@@ -48,10 +56,15 @@ class SteamData:
 
             del row['url']
             row['original_price'] = 0 if pd.isna(row['original_price']) else row['original_price'].replace("$", "")
-            if str(row['original_price']).lower() == "free to play":
+            if str(row['original_price']).lower() == "free to play" or row['original_price'] in (0, "0"):
                 row['original_price'] = "Free"
-            row['discount_price'] = row['original_price'] if pd.isna(row['discount_price']) else row['discount_price']\
+            elif not isfloat(row['original_price']):
+                row['original_price'] = "Demo play"
+            row['discount_price'] = row['original_price'] if pd.isna(row['discount_price']) else row['discount_price'] \
                 .replace("$", "")
+            row['mature_content'] = "No mature content" if pd.isna(row['mature_content']) \
+                                                          or str(row['mature_content']).lower() == "nan" \
+                else "Contain mature content"
             row['achievements'] = 0 if pd.isna(row['achievements']) else row['achievements']
             row['total_languages'] = 0
             languages = str(row['languages']).split(" - ")
