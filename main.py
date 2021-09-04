@@ -7,7 +7,7 @@ if __name__ == '__main__':
     instance_data\
         .clean(deleteNullRows=["publisher", "popular_tags"])\
         .process()\
-        .csv_open()
+        .csv_open(force=True)
     print("Done!")
 
 

@@ -2,7 +2,7 @@ import json
 import csv
 import numpy as np
 import pandas as pd
-from subprocess import Popen
+import os
 
 
 def isfloat(value):
@@ -14,13 +14,13 @@ def isfloat(value):
 
 
 class SteamData:
-    _TARGET_DIR = "files/"
-    _TARGET_FILE = _TARGET_DIR + "processed_data.csv"
+    _TARGET_DIR = "files"
+    _TARGET_FILE = _TARGET_DIR + "/processed_data.csv"
     _STATUS = False
 
     def __init__(self):
         print("Reading csv file...")
-        self._csvf = pd.read_csv(self._TARGET_DIR + "steam_games.csv", encoding="ISO-8859-1")
+        self._csvf = pd.read_csv(self._TARGET_DIR + "/steam_games.csv", encoding="ISO-8859-1")
         self.dict_data = self._csvf.to_dict('records')
 
     def json_save(self):
@@ -68,8 +68,8 @@ class SteamData:
                     headers = list(row.keys())
                 for key in headers:
                     if pd.isna(row[key]) or row[key] == "NaN":
-                        del self.dict_data[self.dict_data.index(row)]
                         print('Removing rows...', flush=True, end="\r")
+                        del self.dict_data[self.dict_data.index(row)]
                         break
             del row['recent_reviews']
             del row['url']
@@ -95,10 +95,13 @@ class SteamData:
         self._STATUS = True
         return self
 
-    def csv_open(self, office_version=16, force=False):
+    def csv_open(self, filetype="saved", force=False):
         if not self._STATUS:
             return
+        project_root = os.path.abspath(os.path.dirname(__file__))
         if not force:
             input("Press Enter to open csv file...")
-        Popen(r"C:\Program Files (x86)\Microsoft Office\root\Office" + str(
-            office_version) + "\EXCEL.EXE " + self._TARGET_FILE)
+        if filetype == "saved":
+            os.startfile(os.path.join(project_root, "files", "processed_data.csv"))
+        elif filetype == "raw":
+            os.startfile(os.path.join(project_root, "files", "steam_games.csv"))
