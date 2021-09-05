@@ -2,8 +2,6 @@ import csv
 import json
 import os
 
-import pandas as pd
-
 
 def isfloat(value):
     try:
@@ -15,6 +13,7 @@ def isfloat(value):
 
 class NoPandasSteamData:
     def __init__(self, filename):
+        """Reading file."""
         self._SAVED_FILE = 'secondary_processed.csv'
         self._RAW_FILE_CSV = filename
         with open("files/" + self._RAW_FILE_CSV, "r", encoding="ISO-8859-1") as csvfile:
@@ -22,9 +21,11 @@ class NoPandasSteamData:
             self._data = list(reader)
 
     def to_json(self):
+        """Testing method."""
         json.dump(list(self._data), open("files/demo.json", "w+"), sort_keys=True, indent=4)
 
     def to_csv(self, filename: str = 'secondary_processed.csv'):
+        """Export file."""
         self._SAVED_FILE = filename
         keys = self._data[0].keys()
         with open('files/' + filename, 'w+', encoding="ISO-8859-1", newline="") as output_file:
@@ -33,12 +34,16 @@ class NoPandasSteamData:
             fc.writerows(self._data)
         return self
 
-    def clean(self, deleteNullRows=None, fillEmpty=True, allowNulls=True):
+    def clean(self, deleteNullRows=None, allowNulls=True):
         """Clean the table."""
         if deleteNullRows is None:
             deleteNullRows = []
         print("Cleaning...")
         for row in self._data[:]:
+            del row['recent_reviews']
+            del row['url']
+            del row['mature_content']
+            del row['recommended_requirements']
             for key in row.keys():
                 if row[key] == "":
                     row[key] = "NaN"
@@ -51,6 +56,7 @@ class NoPandasSteamData:
             row['discount_price'] = row['original_price'] if row['discount_price'] == "NaN" else row['discount_price'] \
                 .replace("$", "")
             row['achievements'] = 0 if row['achievements'] == "NaN" else row['achievements']
+            row['all_reviews'] = str(row['all_reviews']).split(",")[0]
             row['total_languages'] = 0
             languages = str(row['languages']).split(" - ")
             for langs in languages:
@@ -66,10 +72,6 @@ class NoPandasSteamData:
                         print('Removing rows...', flush=True, end="\r")
                         del self._data[self._data.index(row)]
                         break
-            del row['recent_reviews']
-            del row['url']
-            del row['mature_content']
-            del row['recommended_requirements']
         print("Clean completed.")
 
         return self
