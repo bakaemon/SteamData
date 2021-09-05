@@ -54,6 +54,7 @@ class NoPandasSteamData:
                 row['original_price'] = 0.0
             elif not isfloat(row['original_price']):
                 row['original_price'] = 0.0
+            row['popular_tags'] = str(row['popular_tags']).split(",")[0]
             row['discount_price'] = row['original_price'] if row['discount_price'] == "NaN" else \
                 row['discount_price'].replace("$", "")
             row['achievements'] = 0 if row['achievements'] == "NaN" else row['achievements']
