@@ -47,17 +47,15 @@ class NoPandasSteamData:
             for key in row.keys():
                 if row[key] == "":
                     row[key] = "NaN"
-            if str(row['original_price']).lower() in ("free to play", "play for free!") or row['original_price'] in (
-                    0, "0"):
-                row['original_price'] = 0.0
-            elif not isfloat(row['original_price']):
-                row['original_price'] = 0.0
-            row['original_price'] = 0.0 if row['original_price'] == "NaN" \
-                else float(str(row['original_price']).replace("$", ""))
-
+            row['original_price'] = 0.0 \
+                if row['original_price'] == "NaN" \
+                or not isfloat(row['original_price'].replace("$", "")) \
+                else float(row['original_price'].replace("$", ""))
             row['popular_tags'] = str(row['popular_tags']).split(",")[0]
-            row['discount_price'] = row['original_price'] if row['discount_price'] == "NaN" else \
-                float(str(row['discount_price']).replace("$", ""))
+            row['discount_price'] = row['original_price'] \
+                if row['discount_price'] == "NaN"  \
+                or not isfloat(row['discount_price'].replace("$", ""))\
+                else float(row['discount_price'].replace("$", ""))
             row['achievements'] = 0 if row['achievements'] == "NaN" else row['achievements']
             row['all_reviews'] = str(row['all_reviews']).split(",")[0]
             row['total_languages'] = 0
