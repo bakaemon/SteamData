@@ -40,32 +40,48 @@ class NoPandasSteamData:
             deleteNullRows = []
         print("Cleaning...")
         for row in self._data[:]:
+            # delete rows
             del row['recent_reviews']
             del row['url']
             del row['mature_content']
             del row['recommended_requirements']
+            # if any cells are null (empty value), fill it with NaN
             for key in row.keys():
                 if row[key] == "":
                     row[key] = "NaN"
+            # price is filled with 0 if the price cells are either string or NaN, or else remove
+            # the dollar sign and convert it to float number
             row['original_price'] = 0.0 \
                 if row['original_price'] == "NaN" \
                 or not isfloat(row['original_price'].replace("$", "")) \
                 else float(row['original_price'].replace("$", ""))
-            row['popular_tags'] = str(row['popular_tags']).split(",")[0]
             row['discount_price'] = row['original_price'] \
                 if row['discount_price'] == "NaN"  \
                 or not isfloat(row['discount_price'].replace("$", ""))\
                 else float(row['discount_price'].replace("$", ""))
+            # get the first, which is the most popular, tag
+            row['popular_tags'] = str(row['popular_tags']).split(",")[0]
+            # fill 0 to null cell of achievement columns
             row['achievements'] = 0 if row['achievements'] == "NaN" else row['achievements']
+            # get summary of all_review e.g: Most Positive, Mixed
             row['all_reviews'] = str(row['all_reviews']).split(",")[0]
+
+            # split original string into list of string which each string is the language
+            # seperated by comma.
             row['total_languages'] = 0
             languages = str(row['languages']).split(" - ")
             for langs in languages:
+                # split each substring into smaller list by comma, then update the total_language by the length
+                # of smaller list
                 row['total_languages'] += len(langs.split(","))
+            # split genre string which seperate by comma, then save the length of the list into new columns
             genres = str(row['genre']).split(",")
             row['number_of_genre'] = len(genres)
+            # check if any of the columns name in deleteNullRow has cell empty, if there are, delete the row contain
+            # that cell.
             if not allowNulls or len(deleteNullRows) > 0:
                 headers = deleteNullRows
+                # if allowNulls is False, deleteNullRows will contains all the column name of the table
                 if not allowNulls:
                     headers = list(row.keys())
                 for key in headers:
